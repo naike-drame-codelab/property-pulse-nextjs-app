@@ -7,8 +7,9 @@ import logo from "@/assets/images/logo-white.png";
 import profileDefault from "@/assets/images/profile.png";
 import { FaGoogle } from "react-icons/fa";
 import { signIn, signOut, useSession, getProviders } from "next-auth/react";
+import UnreadMessageCount from "./UnreadMessageCount";
 
-const NavBar = () => {
+const Navbar = () => {
     const { data: session } = useSession();
     const profileImage = session?.user?.image;
 
@@ -25,7 +26,15 @@ const NavBar = () => {
         };
 
         setAuthProviders();
+
+        // NOTE: close mobile menu if the viewport size is changed
+        window.addEventListener("resize", () => {
+            setIsMobileMenuOpen(false);
+        });
     }, []);
+
+    // NOTE: the aria-expanded attribute value should change with state for
+    // correct a11y
 
     return (
         <nav className="bg-blue-700 border-b border-blue-500">
@@ -38,7 +47,7 @@ const NavBar = () => {
                             id="mobile-dropdown-button"
                             className="relative inline-flex items-center justify-center p-2 text-gray-400 rounded-md hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
                             aria-controls="mobile-menu"
-                            aria-expanded="false"
+                            aria-expanded={isMobileMenuOpen}
                             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
                         >
                             <span className="absolute -inset-0.5"></span>
@@ -114,7 +123,6 @@ const NavBar = () => {
                     </div>
 
                     {/* <!-- Right Side Menu (Logged Out) --> */}
-
                     {!session && (
                         <div className="hidden md:block md:ml-6">
                             <div className="flex items-center">
@@ -162,15 +170,12 @@ const NavBar = () => {
                                     >
                                         <path
                                             strokeLinecap="round"
-                                            L="round"
+                                            strokeLinejoin="round"
                                             d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
                                         />
                                     </svg>
                                 </button>
-                                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-                                    2
-                                    {/* <!-- Replace with the actual number of notifications --> */}
-                                </span>
+                                <UnreadMessageCount session={session} />
                             </Link>
                             {/* <!-- Profile dropdown button --> */}
                             <div className="relative ml-3">
@@ -179,7 +184,7 @@ const NavBar = () => {
                                         type="button"
                                         className="relative flex text-sm bg-gray-800 rounded-full focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                                         id="user-menu-button"
-                                        aria-expanded="false"
+                                        aria-expanded={isProfileMenuOpen}
                                         aria-haspopup="true"
                                         onClick={() =>
                                             setIsProfileMenuOpen(
@@ -212,32 +217,32 @@ const NavBar = () => {
                                         tabIndex="-1"
                                     >
                                         <Link
-                                            onClick={() => {
-                                                setIsProfileMenuOpen(false);
-                                            }}
                                             href="/profile"
                                             className="block px-4 py-2 text-sm text-gray-700"
                                             role="menuitem"
                                             tabIndex="-1"
                                             id="user-menu-item-0"
+                                            onClick={() => {
+                                                setIsProfileMenuOpen(false);
+                                            }}
                                         >
                                             Your Profile
                                         </Link>
                                         <Link
-                                            onClick={() => {
-                                                setIsProfileMenuOpen(false);
-                                            }}
                                             href="/properties/saved"
                                             className="block px-4 py-2 text-sm text-gray-700"
                                             role="menuitem"
                                             tabIndex="-1"
                                             id="user-menu-item-2"
+                                            onClick={() => {
+                                                setIsProfileMenuOpen(false);
+                                            }}
                                         >
                                             Saved Properties
                                         </Link>
                                         <button
                                             onClick={() => {
-                                                setIsMobileMenuOpen(false);
+                                                setIsProfileMenuOpen(false);
                                                 signOut();
                                             }}
                                             className="block px-4 py-2 text-sm text-gray-700"
@@ -263,7 +268,7 @@ const NavBar = () => {
                             href="/"
                             className={`${
                                 pathname === "/" ? "bg-black" : ""
-                            } text-white hover:bg-gray-900 hover:text-white rounded-md px-3 py-2`}
+                            } text-white block rounded-md px-3 py-2 text-base font-medium`}
                         >
                             Home
                         </Link>
@@ -271,7 +276,7 @@ const NavBar = () => {
                             href="/properties"
                             className={`${
                                 pathname === "/properties" ? "bg-black" : ""
-                            } text-white hover:bg-gray-900 hover:text-white rounded-md px-3 py-2`}
+                            } text-white block rounded-md px-3 py-2 text-base font-medium`}
                         >
                             Properties
                         </Link>
@@ -282,11 +287,12 @@ const NavBar = () => {
                                     pathname === "/properties/add"
                                         ? "bg-black"
                                         : ""
-                                } text-white hover:bg-gray-900 hover:text-white rounded-md px-3 py-2`}
+                                } text-white block rounded-md px-3 py-2 text-base font-medium`}
                             >
                                 Add Property
                             </Link>
                         )}
+
                         {!session &&
                             providers &&
                             Object.values(providers).map((provider, index) => (
@@ -295,7 +301,6 @@ const NavBar = () => {
                                     key={index}
                                     className="flex items-center px-3 py-2 text-white bg-gray-700 rounded-md hover:bg-gray-900 hover:text-white"
                                 >
-                                    <FaGoogle className="mr-2 text-white" />
                                     <span>Login or Register</span>
                                 </button>
                             ))}
@@ -305,5 +310,4 @@ const NavBar = () => {
         </nav>
     );
 };
-
-export default NavBar;
+export default Navbar;
